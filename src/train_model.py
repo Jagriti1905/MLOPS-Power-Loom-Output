@@ -1,4 +1,5 @@
 
+import hashlib
 import pandas as pd
 import mlflow
 import mlflow.sklearn
@@ -17,6 +18,8 @@ from mlflow.tracking import MlflowClient
 # Project paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_FILE = BASE_DIR / "data" / "processed" / "train_cleaned.csv"
+RAW_DATA_FILE = BASE_DIR / "data" / "raw" / "train.csv"
+data_sha256 = hashlib.sha256(RAW_DATA_FILE.read_bytes()).hexdigest()
 
 # MLflow configuration
 mlflow.set_tracking_uri("sqlite:///mlflow.db")
@@ -106,6 +109,7 @@ for model_name, estimator in candidates.items():
         rmse = mean_squared_error(y_test, predictions) ** 0.5
         r2 = r2_score(y_test, predictions)
 
+        mlflow.log_param("data_sha256", data_sha256)
         mlflow.log_param("model", model_name)
         mlflow.log_param("test_size", 0.20)
         mlflow.log_param("random_state", 42)
