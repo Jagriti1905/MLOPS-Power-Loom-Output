@@ -3,6 +3,8 @@ import hashlib
 import pandas as pd
 import mlflow
 import mlflow.sklearn
+import yaml
+import joblib
 
 from pathlib import Path
 from sklearn.model_selection import train_test_split
@@ -17,15 +19,17 @@ from mlflow.tracking import MlflowClient
 
 # Project paths
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_FILE = BASE_DIR / "data" / "processed" / "train_cleaned.csv"
-RAW_DATA_FILE = BASE_DIR / "data" / "raw" / "train.csv"
+with open(BASE_DIR / "params.yaml", "r") as f:
+    params = yaml.safe_load(f)
+DATA_FILE = BASE_DIR / params["data"]["processed_path"]
+RAW_DATA_FILE = BASE_DIR / params["data"]["raw_path"]
 data_sha256 = hashlib.sha256(RAW_DATA_FILE.read_bytes()).hexdigest()
 
 # MLflow configuration
-mlflow.set_tracking_uri("sqlite:///mlflow.db")
-mlflow.set_experiment("mp026-power-loom")
+mlflow.set_tracking_uri(params["mlflow"]["tracking_uri"])
+mlflow.set_experiment(params["mlflow"]["experiment_name"])
 
-MODEL_NAME = "PowerLoomOutput"
+MODEL_NAME = params["mlflow"]["registered_model_name"]
 
 # Run existing cleaning pipeline
 from clean_data import clean_data
@@ -47,7 +51,7 @@ numeric_features = [
 ]
 
 categorical_features = ["fabric", "shed"]
-target = "metres_per_shift"
+target = params["data"]["target"]
 
 X = df[numeric_features + categorical_features]
 y = df[target]
@@ -70,8 +74,12 @@ preprocessor = ColumnTransformer([
 
 # Train-test split
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.20, random_state=42
+    X,
+    y,
+    test_size=params["training"]["test_size"],
+    random_state=params["training"]["random_state"]
 )
+
 
 # Candidate models
 candidates = {

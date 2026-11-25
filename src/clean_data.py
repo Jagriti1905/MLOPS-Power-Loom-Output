@@ -1,6 +1,8 @@
 
 import pandas as pd
+import numpy as np
 from pathlib import Path
+from mp026.clean import clean
 
 # Project paths
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -10,10 +12,19 @@ OUTPUT_FILE = OUTPUT_DIR / "train_cleaned.csv"
 
 
 def clean_data():
-    # Load original training data
     df = pd.read_csv(RAW_FILE)
 
     print("Original shape:", df.shape)
+
+    # Use common cleaning function
+    df = clean(df)
+
+    # Save cleaned data
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    df.to_csv(OUTPUT_FILE, index=False)
+
+    print("Cleaned shape:", df.shape)
+    print("Saved to:", OUTPUT_FILE)
 
     # 1. Remove data leakage column
     if "metres_checked_at_folding" in df.columns:
@@ -28,14 +39,18 @@ def clean_data():
         df.loc[mask, "power_cuts_min"] / 60
     )
 
-    # 4. Document stuck sensor issue
+        # 4. Correct stuck sensor issue
     stuck_mask = (
         (df["date"] >= "2026-03-01") &
         (df["date"] <= "2026-03-20") &
         (df["shift_hours"] == 10.8)
     )
 
-    print("Stuck sensor rows retained:", stuck_mask.sum())
+    print("Stuck sensor rows detected:", stuck_mask.sum())
+
+    df.loc[stuck_mask, "shift_hours"] = np.nan
+
+    print("Stuck sensor values marked as missing.")
 
     # Save cleaned data
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

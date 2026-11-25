@@ -1,0 +1,44 @@
+project:
+  group_id: "G136"
+  problem_id: "MP026"
+
+data:
+  raw_path: "data/raw/train.csv"
+  processed_path: "data/processed/train_cleaned.csv"
+  target: "metres_per_shift"
+
+cleaning:
+  leakage_column: "metres_checked_at_folding"
+  unit_mixup:
+    column: "power_cuts_min"
+    group: "Shed 1"
+    factor: 60
+  stuck_sensor:
+    column: "shift_hours"
+    value: 10.8
+    start_date: "2026-03-01"
+    end_date: "2026-03-20"
+
+training:
+  test_size: 0.2
+  random_state: 42
+
+models:
+  random_forest_1:
+    n_estimators: 100
+    max_depth: 8
+
+  random_forest_2:
+    n_estimators: 200
+    max_depth: 12
+
+  gradient_boosting:
+    n_estimators: 100
+    max_depth: 3
+    learning_rate: 0.1
+
+mlflow:
+  tracking_uri: "sqlite:///mlflow.db"
+  experiment_name: "mp026-power-loom"
+  registered_model_name: "PowerLoomOutput"
+  alias: "champion"

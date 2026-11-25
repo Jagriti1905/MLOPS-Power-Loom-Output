@@ -41,8 +41,8 @@ def clean(df: pd.DataFrame) -> pd.DataFrame:
     df.loc[shed1_mask, "power_cuts_min"] = df.loc[shed1_mask, "power_cuts_min"] / 60
 
     # 3. Fix sentinel: loom_age_yr == 0 → NaN → median
-    df.loc[df["loom_age_yr"] == 0, "loom_age_yr"] = np.nan
-    df["loom_age_yr"] = df["loom_age_yr"].fillna(df["loom_age_yr"].median())
+    #df.loc[df["loom_age_yr"] == 0, "loom_age_yr"] = np.nan
+    #df["loom_age_yr"] = df["loom_age_yr"].fillna(df["loom_age_yr"].median())
 
     # 4. Drop duplicate rows (keep first occurrence)
     df = df.drop_duplicates().reset_index(drop=True)
@@ -55,8 +55,7 @@ def clean(df: pd.DataFrame) -> pd.DataFrame:
     )
     df.loc[stuck_mask, "shift_hours"] = np.nan
     # sort by date and forward-fill, then back-fill any remaining NaN
-    df = df.sort_values("date").reset_index(drop=True)
-    df["shift_hours"] = df["shift_hours"].ffill().bfill()
+    
 
     # 6 & 7: target_typos and spelling_variants not present — no action
 

@@ -41,9 +41,9 @@ data_issues:
     true_levels: null
 
 tracking:
-  experiment_name: null
+  experiment_name: "mp026-power-loom"
   best_run_id: null
-  registered_model_name: null
+  registered_model_name: "PowerLoomOutput"
   champion_version: null
 
 monitoring:

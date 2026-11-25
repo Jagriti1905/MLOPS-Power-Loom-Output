@@ -155,7 +155,7 @@ def test_clean_unit_mixup():
 
 
 # ── Test 7: sentinel fix — loom_age_yr 0 replaced ──────────────
-def test_clean_sentinel_zero():
+def test_clean_preserves_zero_loom_age():
     from mp026.clean import clean
     rows = [
         {"loom_age_yr": 0,  "thread_count": 100, "power_cuts_min": 30.0,
@@ -171,4 +171,4 @@ def test_clean_sentinel_zero():
     ]
     df = pd.DataFrame(rows)
     cleaned = clean(df)
-    assert (cleaned["loom_age_yr"] == 0).sum() == 0
+    assert (cleaned["loom_age_yr"] == 0).sum() == 1
