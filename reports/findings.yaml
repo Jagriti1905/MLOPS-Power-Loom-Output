@@ -42,9 +42,9 @@ data_issues:
 
 tracking:
   experiment_name: "mp026-power-loom"
-  best_run_id: null
+  best_run_id: "9affe254590441a2b23656b6990be594"
   registered_model_name: "PowerLoomOutput"
-  champion_version: null
+  champion_version: 2
 
 monitoring:
   psi:

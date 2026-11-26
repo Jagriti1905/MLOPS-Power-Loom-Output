@@ -27,7 +27,18 @@ data_sha256 = hashlib.sha256(RAW_DATA_FILE.read_bytes()).hexdigest()
 
 # MLflow configuration
 mlflow.set_tracking_uri(params["mlflow"]["tracking_uri"])
-mlflow.set_experiment(params["mlflow"]["experiment_name"])
+experiment_name = "mp026-power-loom-local"
+
+artifact_dir = BASE_DIR / "mlflow_artifacts"
+artifact_dir.mkdir(parents=True, exist_ok=True)
+
+if mlflow.get_experiment_by_name(experiment_name) is None:
+    mlflow.create_experiment(
+        experiment_name,
+        artifact_location=artifact_dir.as_uri()
+    )
+
+mlflow.set_experiment(experiment_name)
 
 MODEL_NAME = params["mlflow"]["registered_model_name"]
 
@@ -137,9 +148,14 @@ for model_name, estimator in candidates.items():
         print("RMSE:", rmse)
         print("R2:", r2)
 
-        if mae < best_mae:
+    if mae < best_mae:
             best_mae = mae
             best_run_id = run.info.run_id
+
+            models_dir = BASE_DIR / "models"
+            models_dir.mkdir(parents=True, exist_ok=True)
+
+            joblib.dump(pipeline, models_dir / "model.joblib")
 
 # Register best model
 model_uri = f"runs:/{best_run_id}/model"
